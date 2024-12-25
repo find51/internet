@@ -1,0 +1,327 @@
+--------------------------lab1(Implement Socket Server in Python programming)--------------
+
+import socket
+
+s = socket.socket()
+print('Socket Created')
+s.bind(('localhost', 6500))
+s.listen(3)
+print('waiting for connection')
+
+while True:
+    c, addr = s.accept()
+    name = c.recv(1024).decode()
+    print("connected with", addr, name)
+
+    c.send(bytes('Welcome to Bangladesh server', 'utf-8'))
+
+
+-------------------------------lab2(Implement Socket Client in Python programming)----
+
+import socket
+c = socket.socket()
+c.connect(('localhost',6500))
+#send client information to server
+name=input("Enter your name:")
+c.send(bytes(name,'utf-8'))
+#receive info from server
+print(c.recv(1024).decode())
+
+
+
+-------------------lab3(3.Implement and establish Socket Client-Server Communication in Python)---------------
+
+
+
+Server-Side Implementation  code:-----------------
+
+import socket
+
+def server_program():
+    # Get the hostname of the machine
+    host = 'localhost'
+    port = 5000  # Port for listening
+
+    # Create a server socket instance
+    server_socket = socket.socket()
+
+    # Bind the host address and port together
+    server_socket.bind((host, port))
+
+    # Listen for incoming connections (allow up to 2 connections)
+    server_socket.listen(2)
+    print(f"Server is listening on {host}:{port}")
+
+    while True:
+        # Accept connection from client
+        conn, address = server_socket.accept()
+        print(f"Connection from {address} has been established.")
+
+        # Receive data from client
+        while True:
+            data = conn.recv(1024).decode()
+            if not data:
+                break  # If no data is received, exit the loop
+            print(f"Received from client: {data}")
+
+            # Send a response back to the client
+            data = input('Enter response to client: ')
+            conn.send(data.encode())  # Send response to client
+
+        # Close the connection
+        conn.close()
+
+if __name__ == '__main__':
+    server_program()
+
+
+
+Client-Side Implementation:-------
+
+
+import socket
+
+def client_program():
+    host = 'localhost' # Get the hostname of the server
+    port = 5000  # Port to connect to
+
+    # Create a client socket instance
+    client_socket = socket.socket()
+
+    # Connect to the server
+    client_socket.connect((host, port))
+
+    message = input("Enter message to send to server: ")  # Get user input
+
+    while message.lower().strip() != 'bye':
+        # Send message to the server
+        client_socket.send(message.encode())
+
+        # Receive response from the server
+        data = client_socket.recv(1024).decode()
+        print(f"Received from server: {data}")
+
+        # Continue communication
+        message = input("Enter message to send to server: ")
+
+    # Close the connection
+    client_socket.close()
+
+if __name__ == '__main__':
+    client_program()
+
+
+
+--------------------------lab4(Implement Socket Multithread Client-Single Server Communication in Python)--------------------------
+
+
+
+server side implementation:----
+
+import socket
+import threading
+
+
+def handle_client(client_socket):
+    """Function to handle client connection."""
+    while True:
+        try:
+            message = client_socket.recv(1024).decode('utf-8')
+            if not message:
+                break
+            print(f"Received: {message}")
+            client_socket.sendall(f"Echo: {message}".encode('utf-8'))
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+    client_socket.close()
+
+
+def start_server(host='127.0.0.1', port=6100):
+    """Function to start the server."""
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen()
+    print(f"Server listening on {host}:{port}")
+
+    while True:
+        client_socket, addr = server_socket.accept()
+        print(f"Accepted connection from {addr}")
+        client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+        client_handler.start()
+
+
+if __name__ == "__main__":
+    start_server()
+
+
+
+
+client_side implement:----
+
+
+import socket
+
+
+def send_messages(server_host='127.0.0.1', server_port=6100):
+    """Function to send messages to the server."""
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((server_host, server_port))
+
+    while True:
+        message = input("Enter message to send (type 'exit' to quit): ")
+        if message.lower() == 'exit':
+            break
+        client_socket.sendall(message.encode('utf-8'))
+        response = client_socket.recv(1024).decode('utf-8')
+        print(f"Server response: {response}")
+
+    client_socket.close()
+
+
+if __name__ == "__main__":
+    send_messages()
+
+
+
+
+
+
+
+
+
+
+----------------------------------lab5-(5.	Create a Simple HTTP server in python)-------------------------
+
+import http.server
+import socketserver
+
+PORT = 8001
+
+Handler = http.server.SimpleHTTPRequestHandler
+
+with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print(f"Serving at port {PORT}")
+    print("successfully build server")
+    httpd.serve_forever()
+
+
+---------------------------------------lab6( 6.	Create a HTTP server as localhost restricted serving in python)
+
+
+import http.server
+import socketserver
+
+PORT = 8002
+
+# Create a handler to serve the files
+Handler = http.server.SimpleHTTPRequestHandler
+
+# Set up the server to listen on localhost (127.0.0.1)
+with socketserver.TCPServer(("127.0.0.1", PORT), Handler) as httpd:
+    print(f"Serving on localhost at port {PORT}")
+    httpd.serve_forever()
+
+
+-----------------------------------------------lab7( same code as lab6 ,just add html)-7.	Establish a connection between html code with a web page that interact with a HTTP server in Python --------------------------------------
+
+
+code(python):
+
+
+import http.server
+import socketserver
+
+PORT = 8002
+
+# Create a handler to serve the files
+Handler = http.server.SimpleHTTPRequestHandler
+
+# Set up the server to listen on localhost (127.0.0.1)
+with socketserver.TCPServer(("127.0.0.1", PORT), Handler) as httpd:
+    print(f"Serving on localhost at port {PORT}")
+    httpd.serve_forever()
+
+
+
+
+code(html):
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local server</title>
+</head>
+<body>
+    <p>Hello new bangladesh</p>
+    <h1>We live in bangladesh</h1>
+    Some mobile list:
+    <ol type="1">
+        <li>Apple phone</li>
+        <li>Samsung</li>
+        <li>Oppo</li>
+        <li>Realme</li>
+        <li>Redmi</li>
+    </ol>
+</body>
+</html>
+
+
+-------------------------------------------lab8(8.	Create a simple DNS server with Python)--------------------------
+
+
+
+
+from dnslib import DNSRecord, QTYPE, RR, A, DNSHeader
+import socket
+import socketserver
+
+# Get the local IP address
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+
+# DNS server configuration
+DOMAIN_TO_IP = {
+    'cseseven.com': local_ip,
+}
+
+class DNSHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        data = self.request[0].strip()
+        socket = self.request[1]
+        try:
+            request = DNSRecord.parse(data)
+            qname = str(request.q.qname)
+            qtype = QTYPE[request.q.qtype]
+            
+            print(f"Received request for: {qname} ({qtype})")
+
+            # Prepare response
+            reply = DNSRecord(DNSHeader(id=request.header.id, qr=1, aa=1, ra=1), q=request.q)
+            
+            if qname in DOMAIN_TO_IP:
+                ip = DOMAIN_TO_IP[qname]
+                reply.add_answer(RR(qname, QTYPE.A, rdata=A(ip), ttl=60))
+                print(f"Responding with IP: {ip}")
+            else:
+                print("Domain not found")
+
+            # Send the response back to the client
+            socket.sendto(reply.pack(), self.client_address)
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+if __name__ == "__main__":
+    HOST, PORT = "0.0.0.0", 53  # DNS typically uses port 53
+
+    with socketserver.UDPServer((HOST, PORT), DNSHandler) as server:
+        print("DNS Server is running...")
+        server.serve_forever()
+
+
+
+
+
